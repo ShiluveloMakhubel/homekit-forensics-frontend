@@ -1,15 +1,20 @@
-// src/App.js
 import React from 'react';
-import './App.css';
-import Home from './Home/Home';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Dashboard from './Components/Dashboard/Dashboard';
+import DeviceDetails from './Components/DeviceDetails/DeviceDetails';
+import Settings from './Components/Settings/Settings';
+import Logs from './Components/Logs/Logs';
 
 function App() {
     return (
-        <div className="App">
-            <header className="App-header">
-                <Home />
-            </header>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/device-details" element={<DeviceDetails />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/logs" element={<Logs />} />
+            </Routes>
+        </Router>
     );
 }
 
