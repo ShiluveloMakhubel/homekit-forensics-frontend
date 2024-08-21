@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import DeviceOverview from './DeviceOverview';
 import RecentActivities from './RecentActivities';
 import SystemStatus from './SystemStatus';
@@ -10,6 +11,26 @@ const Dashboard = () => {
             <DeviceOverview />
             <RecentActivities />
             <SystemStatus />
+            <ul className="dashboard-links">
+                <li>
+                    <Link to="/device-details" className="dashboard-link">
+                        <span className="material-icons">settings_input_component</span>
+                        Device Details
+                    </Link>
+                </li>
+                <li>
+                    <Link to="/settings" className="dashboard-link">
+                        <span className="material-icons">settings</span>
+                        Settings
+                    </Link>
+                </li>
+                <li>
+                    <Link to="/logs" className="dashboard-link">
+                        <span className="material-icons">analytics</span>
+                        Logs
+                    </Link>
+                </li>
+            </ul>
         </div>
     );
 };
