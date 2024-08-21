@@ -1,7 +1,11 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
 import requests
 import ssl
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.poolmanager import PoolManager
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all domains on all routes
 
 class SSLAdapter(HTTPAdapter):
     def __init__(self, ssl_context=None, **kwargs):
@@ -12,29 +16,22 @@ class SSLAdapter(HTTPAdapter):
         kwargs['ssl_context'] = self.ssl_context
         return super().init_poolmanager(*args, **kwargs)
 
-# Create an SSL context
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-ssl_context.load_cert_chain(certfile='cert.pem', keyfile='key.pem')
+@app.route('/api/devices')
+def get_devices():
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ssl_context.load_cert_chain(certfile='cert.pem', keyfile='key.pem')
 
-session = requests.Session()
-session.mount('https://', SSLAdapter(ssl_context))
+    session = requests.Session()
+    session.mount('https://', SSLAdapter(ssl_context))
 
-# Define the URL and headers
-url = 'http://localhost:8581/api/status/ram'  # Target the specific API endpoint
-headers = {
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjMwNTY0ODgsImV4cCI6MTcyMzA4NTI4OH0.lCMs96Y7krfjyPTpddYxLu8DwKRvHAbaCtSqs1dLJKw',}
+    url = 'http://localhost:8581/api/accessories'
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjQyMzMzNTUsImV4cCI6MTcyNDI2MjE1NX0.tloYNXnXx4TDtYOk2BKYO7ZVNDXyF5zTDvgSWC0n9iQ'}
 
-try:
-    response = session.get(url, headers=headers, verify=False)  # 'verify=False' to skip SSL verification
-    print(f"Response status code: {response.status_code}")
+    response = session.get(url, headers=headers)
     if response.status_code == 200:
-        print("Data retrieved successfully:")
-        try:
-            json_data = response.json()
-            print(json_data)
-        except ValueError:
-            print("Response content is not valid JSON")
+        return jsonify(response.json()), 200
     else:
-        print(f"Failed to retrieve data: {response.status_code}")
-except requests.exceptions.RequestException as e:
-    print(f"Request exception occurred: {e}")
+        return jsonify({'error': 'Failed to retrieve data'}), response.status_code
+
+if __name__ == '__main__':
+    app.run(debug=True)
