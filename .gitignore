@@ -57,4 +57,4 @@ node_modules
 venv
 input/T62.jpg
 /node_modules/web-vitals/src/lib/polyfills
-/node_modules
+/node_modules/
