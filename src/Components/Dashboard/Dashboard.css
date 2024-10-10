@@ -30,3 +30,6 @@ li {
 li:last-child {
     border-bottom: none; /* No border for the last item */
 }
+.device-overview {
+    grid-column: 1 / -1; /* Make DeviceOverview take the full width */
+}

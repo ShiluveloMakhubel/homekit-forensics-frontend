@@ -8,10 +8,11 @@ import './Dashboard.css'; // Import the CSS file
 const Dashboard = () => {
     return (
         <div className="dashboard-container">
-            <DeviceOverview />
-            <RecentActivities />
+            
             <SystemStatus />
+            <RecentActivities />
             <ul className="dashboard-links">
+            <DeviceOverview className="device-overview" />
                 <li>
                     <Link to="/device-details" className="dashboard-link">
                         <span className="material-icons">settings_input_component</span>
@@ -30,7 +31,10 @@ const Dashboard = () => {
                         Logs
                     </Link>
                 </li>
+               
             </ul>
+           
+
         </div>
     );
 };
