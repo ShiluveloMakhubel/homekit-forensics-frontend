@@ -11,6 +11,7 @@
 # production
 /build
 /node_modules
+/venv
 
 # misc
 .DS_Store
@@ -53,8 +54,4 @@ storybook-static
 # TypeScript
 *.tsbuildinfo
 node_modules
-node_modules
-node_modules
-node_modules
-node_modules
-node_modules
+venv
