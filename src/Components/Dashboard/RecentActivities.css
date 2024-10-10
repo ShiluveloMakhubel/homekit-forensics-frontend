@@ -14,3 +14,21 @@
     font-size: 1.5rem;
     margin-bottom: 10px;
 }
+.activities-list {
+    margin-top: 20px;
+  }
+  
+  .activity-item {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .service-item {
+    margin-top: 10px;
+  }
+  
+  .characteristic-item {
+    margin-left: 20px;
+  }

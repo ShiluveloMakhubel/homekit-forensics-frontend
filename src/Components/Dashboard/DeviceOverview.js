@@ -23,14 +23,10 @@ const DeviceOverview = () => {
             <h2>Device Overview</h2>
             {devices.length > 0 ? (
                 <ul>
-                    {devices.map(device => (
-                        <li key={device.aid}>
-                            <strong>{device.accessoryInformation.Name}</strong> - 
-                            Manufacturer: {device.accessoryInformation.Manufacturer}, 
-                            Model: {device.accessoryInformation.Model}, 
-                            Firmware: {device.accessoryInformation['Firmware Revision']},
-                            IP: {device.instance.ipAddress}, 
-                            Port: {device.instance.port}
+                    {devices.map((device, index) => (
+                        <li key={index}>
+                            <strong>{device.serviceName}</strong> - 
+                            
                         </li>
                     ))}
                 </ul>

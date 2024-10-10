@@ -1,7 +1,7 @@
 // src/components/DeviceDetails/DeviceDetails.js
 import React, { useState } from 'react';
 import DeviceInfo from './DeviceInfo';
-import DeviceLogs from './DeviceLogs';
+import NetWorkInterface from './NetworkInterface';
 import DeviceConfig from './DeviceConfig';
 import './DeviceDetails.css'; // For styling
 
@@ -21,7 +21,7 @@ const DeviceDetails = () => {
                     className={activeTab === 'logs' ? 'active' : ''}
                     onClick={() => setActiveTab('logs')}
                 >
-                    Device Logs
+                    Network Interface
                 </button>
                 <button
                     className={activeTab === 'config' ? 'active' : ''}
@@ -32,7 +32,7 @@ const DeviceDetails = () => {
             </div>
             <div className="tab-content">
                 {activeTab === 'info' && <DeviceInfo />}
-                {activeTab === 'logs' && <DeviceLogs />}
+                {activeTab === 'logs' && <NetWorkInterface />}
                 {activeTab === 'config' && <DeviceConfig />}
             </div>
         </div>
