@@ -1,13 +1,18 @@
-from flask import Flask, jsonify
+from flask import Flask, request,jsonify
 from flask_cors import CORS
 import requests
 import ssl
+import json
 from requests.adapters import HTTPAdapter
 import bcrypt
-from flask import Flask, jsonify
 from flask_pymongo import PyMongo
 from bson import ObjectId
+from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash
 import logging
+import os
+import hashlib
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
      
@@ -27,6 +32,8 @@ class SSLAdapter(HTTPAdapter):
         kwargs['ssl_context'] = self.ssl_context
         return super().init_poolmanager(*args, **kwargs)
 
+
+
 @app.route('/api/devices')
 def get_devices():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -37,17 +44,21 @@ def get_devices():
 
     url = 'http://localhost:8581/api/accessories'
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjcxOTk4NDYsImV4cCI6MTcyNzIyODY0Nn0.pYdCCVkrcDvMwA1mgrf_C9Ki7Ye3h1oF_BBYBuBkaSg'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
     response = session.get(url, headers=headers)
 
     if response.status_code == 200:
         devices = response.json()
 
-        # Store in MongoDB with hashed IPs and prepare devices for front-end
+        # Store in MongoDB with hashed IPs using SHA-3
         device_list = []
         for device in devices:
             ip_address = device['instance']['ipAddress']
-            hashed_ip = bcrypt.hashpw(ip_address.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+            # Hash the IP address using SHA-3 (256-bit)
+            sha3_hasher = hashlib.sha3_256()
+            sha3_hasher.update(ip_address.encode('utf-8'))
+            hashed_ip = sha3_hasher.hexdigest()
 
             # Check if the device exists based on serviceName or IP address
             mongo.db.accessories.update_one(
@@ -79,6 +90,7 @@ def get_devices():
         return jsonify(device_list), 200
     else:
         return jsonify({'error': 'Failed to retrieve data'}), response.status_code
+
     
 
 def convert_objectid_to_str(data):
@@ -96,6 +108,7 @@ def convert_objectid_to_str(data):
         # Return data unchanged if it's not a dict, list, or ObjectId
         return data
 
+
 @app.route('/api/system-status', methods=['GET'])
 def get_system_status():
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -112,7 +125,7 @@ def get_system_status():
         'network_status': '/status/network'
     }
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjcxOTk4NDYsImV4cCI6MTcyNzIyODY0Nn0.pYdCCVkrcDvMwA1mgrf_C9Ki7Ye3h1oF_BBYBuBkaSg'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
     
     system_data = {}
     for key, endpoint in endpoints.items():
@@ -128,14 +141,28 @@ def get_system_status():
             logging.error(f"Exception while fetching {key}: {e}")
             system_data[key] = {'error': str(e)}
 
-    # Store the data in a different MongoDB collection
-    # Store the data in a different MongoDB collection
+    # Convert system data to JSON string and then encode to bytes
+    system_data_json = json.dumps(system_data, sort_keys=True)  # Convert the data to a JSON string
+    system_data_bytes = system_data_json.encode('utf-8')  # Encode the JSON string to bytes
+
+    # Hash the system data using SHA-3 (256-bit)
+    sha3_hasher = hashlib.sha3_256()
+    sha3_hasher.update(system_data_bytes)
+    system_data_hash = sha3_hasher.hexdigest()  # Get the hash as a hex string
+
+    # Store the hash as part of the data
+    system_data['hash'] = system_data_hash  # Store the hash as part of the stored data
+
+    # Store the data in MongoDB
     system_data_id = mongo.db.system_status.insert_one(system_data)
 
-    # Convert ObjectId to string
+    # Convert ObjectId to string for JSON response
     system_data['_id'] = str(system_data_id.inserted_id)
 
     return jsonify(convert_objectid_to_str(system_data)), 200
+
+
+
 
 @app.route('/api/recent-activities', methods=['GET'])
 def get_recent_activities():
@@ -145,24 +172,139 @@ def get_recent_activities():
     session = requests.Session()
     session.mount('https://', SSLAdapter(ssl_context))
 
-    url = 'http://localhost:8581/api/'  # Adjust the URL for recent activities
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjcxOTk4NDYsImV4cCI6MTcyNzIyODY0Nn0.pYdCCVkrcDvMwA1mgrf_C9Ki7Ye3h1oF_BBYBuBkaSg'}
+    url = 'http://localhost:8581/api/server/cached-accessories'  # Adjust the URL for recent activities
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
 
     try:
         response = session.get(url, headers=headers)
         if response.status_code == 200:
             activities = response.json()
 
-            # Store recent activities in MongoDB (optional)
+            # Convert activities to a JSON string and encode it to bytes
+            activities_json = json.dumps(activities, sort_keys=True)
+            activities_bytes = activities_json.encode('utf-8')
+
+            # Hash the activities using SHA3-256
+            sha3_hasher = hashlib.sha3_256()
+            sha3_hasher.update(activities_bytes)
+            hashed_activities = sha3_hasher.hexdigest()  # Get the hash as a hex string
+
+            # Insert hashed activities and original activities into MongoDB
+            mongo.db.recent_activities.insert_one({'hashed_activities': hashed_activities})
             mongo.db.recent_activities.insert_many(activities)
 
-            # Convert ObjectIds to strings before returning
+            # Convert ObjectIds to strings before returning the response
             return jsonify(convert_objectid_to_str(activities)), 200
         else:
             return jsonify({'error': 'Failed to retrieve activities'}), response.status_code
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+    
 
+
+
+def convert_objectid_to_str(data):
+    """ Recursively convert all ObjectIds to strings in a dictionary, list, or nested structure. """
+    if isinstance(data, dict):
+        return {k: convert_objectid_to_str(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_objectid_to_str(i) for i in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    else:
+        return data
+
+
+
+
+@app.route('/api/device-logs', methods=['GET'])
+def get_logs():
+    try:
+        with open('homebridge.log', 'r') as f:
+            logs = f.readlines()
+        
+        # Process logs into a structure like [{"line": 1, "content": "Log entry"}]
+        log_data = [{"line": index + 1, "content": log.strip()} for index, log in enumerate(logs)]
+
+        # Convert log data to a JSON string and encode it to bytes
+        log_data_json = json.dumps(log_data, sort_keys=True)
+        log_data_bytes = log_data_json.encode('utf-8')
+
+        # Hash the log data using SHA3-256
+        sha3_hasher = hashlib.sha3_256()
+        sha3_hasher.update(log_data_bytes)
+        hashed_logdata = sha3_hasher.hexdigest()  # Get the hash as a hex string
+
+        # Store hashed log data and original log data in MongoDB
+        mongo.db.device_logs.insert_one({'hashed_logdata': hashed_logdata})
+        mongo.db.device_logs.insert_many(convert_objectid_to_str(log_data))  # Insert original log data
+        
+
+# Example of adding a new user to MongoDB
+        
+        return jsonify(log_data), 200
+    except Exception as e:
+        app.logger.error(f'Error reading log file: {e}')
+        return jsonify({'error': 'Could not read log file'}), 500
+
+    
+
+
+@app.route('/api/network-interfaces', methods=['GET'])
+def get_network_interfaces():
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ssl_context.load_cert_chain(certfile='cert.pem', keyfile='key.pem')
+
+    session = requests.Session()
+    session.mount('https://', SSLAdapter(ssl_context))
+
+    url = 'http://localhost:8581/api/server/network-interfaces/system'  # Adjust the URL for network interfaces
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
+
+    try:
+        response = session.get(url, headers=headers)
+        if response.status_code == 200:
+            activities = response.json()
+
+            # Convert activities to a JSON string and encode it to bytes
+            activities_json = json.dumps(activities, sort_keys=True)
+            activities_bytes = activities_json.encode('utf-8')
+
+            # Hash the activities using SHA3-256
+            sha3_hasher = hashlib.sha3_256()
+            sha3_hasher.update(activities_bytes)
+            hashed_activities = sha3_hasher.hexdigest()  # Get the hash as a hex string
+
+            # Store the hashed activities in MongoDB
+            mongo.db.network_interfaces.insert_one({'hashed_activities': hashed_activities})
+            mongo.db.network_interfaces.insert_many(activities)  # Insert original activities
+
+            return jsonify(convert_objectid_to_str(activities)), 200
+        else:
+            return jsonify({'error': 'Failed to retrieve activities'}), response.status_code
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()  # Get the request data (JSON)
+    
+    username = data.get('username')
+    password = data.get('password')
+    
+    # Find the user in the database by username
+    user = mongo.db.login.find_one({'username': username})
+    
+    if user:
+        # Check if the provided password matches the hashed password in the DB
+        if check_password_hash(user['password'], password):
+            # You can generate and return a token here if needed (e.g., JWT token)
+            return jsonify({'message': 'Login successful', 'username': username}), 200
+        else:
+            return jsonify({'error': 'Invalid username or password'}), 401
+    else:
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
 if __name__ == '__main__':
     app.run(debug=True)
