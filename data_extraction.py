@@ -58,29 +58,37 @@ def get_devices():
     if response.status_code == 200:
         devices = response.json()
 
-        # Store in MongoDB with hashed IPs using SHA-3
+        # Store in MongoDB with hashed combined data using SHA-3
         device_list = []
         for device in devices:
-            ip_address = device['instance']['ipAddress']
+            # Combine all relevant fields into a single string for hashing
+            combined_data = (
+                device['serviceName'] +
+                device['accessoryInformation']['Manufacturer'] +
+                device['accessoryInformation']['Model'] +
+                device['accessoryInformation']['Firmware Revision'] +
+                device['instance']['ipAddress'] +
+                str(device['instance']['port'])
+            )
 
-            # Hash the IP address using SHA-3 (256-bit)
+            # Hash the combined string using SHA-3 (256-bit)
             sha3_hasher = hashlib.sha3_256()
-            sha3_hasher.update(ip_address.encode('utf-8'))
-            hashed_ip = sha3_hasher.hexdigest()
+            sha3_hasher.update(combined_data.encode('utf-8'))
+            hashed_data = sha3_hasher.hexdigest()
 
-            # Check if the device exists based on serviceName or IP address
+            # Check if the device exists based on serviceName or hashed data
             mongo.db.accessories.update_one(
-                {'serviceName': device['serviceName']},  # Match based on serviceName (or you could use ipAddress)
+                {'serviceName': device['serviceName']},  # Match based on serviceName (or you could use hashed_data)
                 {
                     '$set': {
                         'name': device['serviceName'],
-                        'hashed_ip': hashed_ip,
+                        'hashed_data': hashed_data,  # Store the hash of combined data
                         'manufacturer': device['accessoryInformation']['Manufacturer'],
                         'model': device['accessoryInformation']['Model'],
                         'firmware': device['accessoryInformation']['Firmware Revision'],
                         'ipAddress': device['instance']['ipAddress'],
                         'port': device['instance']['port'],
-                         'timestamp': datetime.utcnow()+ timedelta(hours=2)   # Add timestamp
+                        'timestamp': datetime.utcnow() + timedelta(hours=2)  # Add timestamp
                     }
                 },
                 upsert=True  # Insert a new document if it doesn't exist
@@ -99,6 +107,7 @@ def get_devices():
         return jsonify(device_list), 200
     else:
         return jsonify({'error': 'Failed to retrieve data'}), response.status_code
+
 
     
 
@@ -234,13 +243,14 @@ def convert_objectid_to_str(data):
 @app.route('/api/device-logs', methods=['GET'])
 def get_logs():
     try:
+        # Read the entire log file content
         with open('homebridge.log', 'r') as f:
-            logs = f.readlines()
+            logs = f.readlines()  # Still using readlines() to process for API response
         
         # Process logs into a structure like [{"line": 1, "content": "Log entry"}]
         log_data = [{"line": index + 1, "content": log.strip()} for index, log in enumerate(logs)]
-
-        # Convert log data to a JSON string and encode it to bytes
+        
+        # Convert log data to a JSON string and encode it to bytes (for hashing)
         log_data_json = json.dumps(log_data, sort_keys=True)
         log_data_bytes = log_data_json.encode('utf-8')
 
@@ -249,16 +259,21 @@ def get_logs():
         sha3_hasher.update(log_data_bytes)
         hashed_logdata = sha3_hasher.hexdigest()  # Get the hash as a hex string
 
-        # Store hashed log data and original log data in MongoDB
-        mongo.db.device_logs.insert_one(add_timestamp({'hashed_logdata': hashed_logdata}))
-        mongo.db.device_logs.insert_many(add_timestamp(convert_objectid_to_str(log_data)))
+        # Store the entire log file content (not individual lines) in MongoDB
+        full_log_content = ''.join(logs).strip()  # Join all lines into a single string
+        mongo.db.device_logs.insert_one(add_timestamp({
+            'hashed_logdata': hashed_logdata,
+            'log_data': full_log_content  # Store the full log content as one document
+        }))
 
-        # **Missing return statement added here:**
+        # Return the processed log data (line by line) as JSON to the client
         return jsonify(log_data), 200
     
     except Exception as e:
         app.logger.error(f'Error reading log file: {e}')
         return jsonify({'error': 'Could not read log file'}), 500
+
+
 
 
     
@@ -318,6 +333,27 @@ def login():
             return jsonify({'error': 'Invalid username or password'}), 401
     else:
         return jsonify({'error': 'Invalid username or password'}), 401
+    
+@app.route('/api/warnings', methods=['POST'])
+def store_warning():
+    data = request.json
+    if 'message' not in data or 'metric' not in data or 'value' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    warning_message = data['message']
+    metric = data['metric']
+    value = data['value']
+    timestamp = datetime.utcnow() + timedelta(hours=2)  # Adjust timezone as needed
+
+    # Store the warning in MongoDB (or any other database)
+    mongo.db.warnings.insert_one({
+        'message': warning_message,
+        'metric': metric,
+        'value': value,
+        'timestamp': timestamp
+    })
+
+    return jsonify({'message': 'Warning stored successfully'}), 201
     
 if __name__ == '__main__':
     app.run(debug=True)
