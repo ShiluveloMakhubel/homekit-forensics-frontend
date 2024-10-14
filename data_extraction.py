@@ -11,6 +11,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 import logging
 import os
+from datetime import datetime, timedelta
 import hashlib
 
 app = Flask(__name__)
@@ -32,7 +33,14 @@ class SSLAdapter(HTTPAdapter):
         kwargs['ssl_context'] = self.ssl_context
         return super().init_poolmanager(*args, **kwargs)
 
-
+def add_timestamp(data):
+    if isinstance(data, dict):
+        data['timestamp'] = datetime.utcnow()+ timedelta(hours=2) 
+    elif isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict):
+                item['timestamp'] = datetime.utcnow()+ timedelta(hours=2) 
+    return data
 
 @app.route('/api/devices')
 def get_devices():
@@ -44,7 +52,7 @@ def get_devices():
 
     url = 'http://localhost:8581/api/accessories'
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
     response = session.get(url, headers=headers)
 
     if response.status_code == 200:
@@ -71,7 +79,8 @@ def get_devices():
                         'model': device['accessoryInformation']['Model'],
                         'firmware': device['accessoryInformation']['Firmware Revision'],
                         'ipAddress': device['instance']['ipAddress'],
-                        'port': device['instance']['port']
+                        'port': device['instance']['port'],
+                         'timestamp': datetime.utcnow()+ timedelta(hours=2)   # Add timestamp
                     }
                 },
                 upsert=True  # Insert a new document if it doesn't exist
@@ -125,7 +134,7 @@ def get_system_status():
         'network_status': '/status/network'
     }
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
     
     system_data = {}
     for key, endpoint in endpoints.items():
@@ -154,7 +163,9 @@ def get_system_status():
     system_data['hash'] = system_data_hash  # Store the hash as part of the stored data
 
     # Store the data in MongoDB
+    system_data['timestamp'] = datetime.utcnow()  # Add timestamp to system status
     system_data_id = mongo.db.system_status.insert_one(system_data)
+    
 
     # Convert ObjectId to string for JSON response
     system_data['_id'] = str(system_data_id.inserted_id)
@@ -173,7 +184,7 @@ def get_recent_activities():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/cached-accessories'  # Adjust the URL for recent activities
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
 
     try:
         response = session.get(url, headers=headers)
@@ -190,8 +201,10 @@ def get_recent_activities():
             hashed_activities = sha3_hasher.hexdigest()  # Get the hash as a hex string
 
             # Insert hashed activities and original activities into MongoDB
-            mongo.db.recent_activities.insert_one({'hashed_activities': hashed_activities})
-            mongo.db.recent_activities.insert_many(activities)
+            hashed_activities_data = add_timestamp({'hashed_activities': hashed_activities})
+            mongo.db.recent_activities.insert_one(hashed_activities_data)
+            mongo.db.recent_activities.insert_many(add_timestamp(activities))
+            
 
             # Convert ObjectIds to strings before returning the response
             return jsonify(convert_objectid_to_str(activities)), 200
@@ -237,16 +250,16 @@ def get_logs():
         hashed_logdata = sha3_hasher.hexdigest()  # Get the hash as a hex string
 
         # Store hashed log data and original log data in MongoDB
-        mongo.db.device_logs.insert_one({'hashed_logdata': hashed_logdata})
-        mongo.db.device_logs.insert_many(convert_objectid_to_str(log_data))  # Insert original log data
-        
+        mongo.db.device_logs.insert_one(add_timestamp({'hashed_logdata': hashed_logdata}))
+        mongo.db.device_logs.insert_many(add_timestamp(convert_objectid_to_str(log_data)))
 
-# Example of adding a new user to MongoDB
-        
+        # **Missing return statement added here:**
         return jsonify(log_data), 200
+    
     except Exception as e:
         app.logger.error(f'Error reading log file: {e}')
         return jsonify({'error': 'Could not read log file'}), 500
+
 
     
 
@@ -260,7 +273,7 @@ def get_network_interfaces():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/network-interfaces/system'  # Adjust the URL for network interfaces
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1OTk5NjYsImV4cCI6MTcyODYyODc2Nn0.36W26fjZXqEOHrgY2vElmJ9Y4ZKX0pPNKD_saulSVz8'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
 
     try:
         response = session.get(url, headers=headers)
@@ -308,3 +321,4 @@ def login():
     
 if __name__ == '__main__':
     app.run(debug=True)
+    
