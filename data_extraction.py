@@ -13,6 +13,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 import hashlib
+import time
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
@@ -52,7 +53,7 @@ def get_devices():
 
     url = 'http://localhost:8581/api/accessories'
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
     response = session.get(url, headers=headers)
 
     if response.status_code == 200:
@@ -143,7 +144,7 @@ def get_system_status():
         'network_status': '/status/network'
     }
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
     
     system_data = {}
     for key, endpoint in endpoints.items():
@@ -193,7 +194,7 @@ def get_recent_activities():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/cached-accessories'  # Adjust the URL for recent activities
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
 
     try:
         response = session.get(url, headers=headers)
@@ -288,7 +289,7 @@ def get_network_interfaces():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/network-interfaces/system'  # Adjust the URL for network interfaces
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg4OTU3NjQsImV4cCI6MTcyODkyNDU2NH0.qZNk1CGa5NbM0RUajoOhTScxQ0Zx0PViP9zT7Lf4tQA'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
 
     try:
         response = session.get(url, headers=headers)
@@ -354,7 +355,75 @@ def store_warning():
     })
 
     return jsonify({'message': 'Warning stored successfully'}), 201
-    
+
+last_switch_status = None
+
+# Database (for demonstration, using in-memory list)
+switch_logs = []
+
+# Endpoint to fetch the latest switch status
+@app.route('/api/switch/status', methods=['GET'])
+def get_switch_status():
+    return jsonify(switch_logs[-1] if switch_logs else {"message": "No data available."})
+
+# Helper function to log status to the database (here, an in-memory list)
+def log_switch_status(switch_status):
+    status_str = "On" if switch_status == 1 else "Off"
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = {
+        "timestamp": timestamp,
+        "status": status_str
+    }
+
+    # Print to console (for debug)
+    print(f"Switch was {status_str} at {timestamp}")
+
+    # Append log entry to switch_logs list
+    switch_logs.append(log_entry)
+
+# Function to fetch the switch status from the accessories API
+def fetch_switch_status():
+    global last_switch_status
+    try:
+        response = requests.get('http://localhost:8581/api/accessories', headers={
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxODI2NzYsImV4cCI6MTcyOTIxMTQ3Nn0.yI9xRVVnQ5ds6T1JGc9RoSUIkhmwLvSKcfZGBDoBcII',
+            'accept': '*/*'
+        })
+
+        accessories = response.json()
+
+        # Ensure the response is a list
+        if isinstance(accessories, list):
+            for accessory in accessories:
+                if accessory.get('humanType') == "Switch":
+                    # Check for the "On" value in the "values" dictionary
+                    switch_status = accessory.get('values', {}).get('On')
+                    
+                    if switch_status is not None:
+                        # Log the status if it changed
+                        if switch_status != last_switch_status:
+                            log_switch_status(switch_status)
+                            last_switch_status = switch_status
+                        break
+            else:
+                print("Switch not found in the list of accessories.")
+        else:
+            print("Unexpected response format. Expected a list.")
+    except Exception as e:
+        print(f"Error fetching switch status: {e}")
+
+# Background task to continuously check the switch status every 10 seconds
+def monitor_switch():
+    while True:
+        fetch_switch_status()
+        time.sleep(10)
+
+# Start monitoring the switch in the background
+import threading
+monitor_thread = threading.Thread(target=monitor_switch)
+monitor_thread.daemon = True
+monitor_thread.start()
+   
 if __name__ == '__main__':
     app.run(debug=True)
     
