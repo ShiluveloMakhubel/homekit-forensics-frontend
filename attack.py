@@ -8,7 +8,7 @@ url = 'http://localhost:8581/api/accessories/48355461c344c5eea73e51d7281e793fec9
 # Headers (with Authorization)
 headers = {
     'accept': '*/*',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3Mjg1NTM2NzksImV4cCI6MTcyODU4MjQ3OX0.sAnnWLsqdFUyMgwjyOu9v8cYr0ICn1hI4sd8dAcak7E',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkwNzc5NDAsImV4cCI6MTcyOTEwNjc0MH0.pYYLob30wpYmBiWFwZx6VQP0MPi7rwLS2yvaGhCtHMw',
     'Content-Type': 'application/json'
 }
 
