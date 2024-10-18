@@ -26,22 +26,21 @@ const DeviceInfo = () => {
                             <strong>{device.serviceName}</strong> -
 
                            
-                            {device.manufaturer}
-                            {device.model}
-                            {device.port}
-                            {device.firmware}
+                            
+                            
 
                         </li>
-                        {device.ipAddress}
+                         <div>manufacturer: {device.manufacturer}</div>
+                         <div>ipAddress: {device.ipAddress}</div>
                             
                             
-                            <div>{device.model}</div>
+                            <div>Device Name: {device.model}</div>
                             
                             
-                            <div>{device.port}</div>
+                              <div>port: {device.port}</div>
                             
                             
-                            <div>{device.firmware}</div>
+                            <div>firmware: {device.firmware}</div>
                             </>
                     ))}
                 </ul>

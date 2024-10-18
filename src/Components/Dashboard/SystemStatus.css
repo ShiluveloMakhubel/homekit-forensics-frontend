@@ -48,3 +48,25 @@
     border: 1px solid red;
     border-radius: 5px;
 }
+
+
+
+.warning-card {
+    padding: 10px;
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.flashing {
+    animation: flashing 1s infinite;
+}
+
+@keyframes flashing {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+

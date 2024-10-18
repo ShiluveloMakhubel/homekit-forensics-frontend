@@ -10,7 +10,7 @@ const Dashboard = () => {
         <div className="dashboard-container">
             
             <SystemStatus />
-            <RecentActivities />
+            
             <ul className="dashboard-links">
             <DeviceOverview className="device-overview" />
                 <li>

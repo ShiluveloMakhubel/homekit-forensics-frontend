@@ -31,6 +31,7 @@ const SystemStatus = () => {
     const [ramData, setRamData] = useState([]);
     const [networkData, setNetworkData] = useState([]);
     const [timestamps, setTimestamps] = useState([]);
+    const [warning, setWarning] = useState(null);  // Warning state
 
     const maxDataPoints = 20;
 
@@ -40,7 +41,10 @@ const SystemStatus = () => {
         return 'green';
     };
 
-    const sendWarning = (message, metric, value) => {
+    const triggerWarning = (message, metric, value) => {
+        setWarning({ message, metric, value });
+
+        // Send the warning to the backend
         fetch('http://localhost:5000/api/warnings', {
             method: 'POST',
             headers: {
@@ -59,6 +63,10 @@ const SystemStatus = () => {
         .catch(error => {
             console.error('Error sending warning:', error);
         });
+    };
+
+    const removeWarning = () => {
+        setWarning(null);  // Clear the warning when the values return to normal
     };
 
     useEffect(() => {
@@ -81,9 +89,10 @@ const SystemStatus = () => {
                         return newData.length > maxDataPoints ? newData.slice(1) : newData;
                     });
 
-                    // Send warning if CPU exceeds threshold
-                    if (cpuLoad > 80) {
-                        sendWarning('CPU usage is critically high.', 'CPU', cpuLoad);
+                    if (cpuLoad > 85) {
+                        triggerWarning('CPU usage is critically high.', 'CPU', cpuLoad);
+                    } else if (warning?.metric === 'CPU') {
+                        removeWarning();
                     }
 
                     // Update RAM data
@@ -93,9 +102,10 @@ const SystemStatus = () => {
                         return newData.length > maxDataPoints ? newData.slice(1) : newData;
                     });
 
-                    // Send warning if RAM exceeds threshold
                     if (usedRamPercent > 80) {
-                        sendWarning('RAM usage is critically high.', 'RAM', usedRamPercent);
+                        triggerWarning('RAM usage is critically high.', 'RAM', usedRamPercent);
+                    } else if (warning?.metric === 'RAM') {
+                        removeWarning();
                     }
 
                     // Update Network data
@@ -105,9 +115,10 @@ const SystemStatus = () => {
                         return newData.length > maxDataPoints ? newData.slice(1) : newData;
                     });
 
-                    // Send warning if network usage exceeds threshold (example threshold: 100 MB)
-                    if (totalNetworkUsage > 150) {
-                        sendWarning('Network usage is critically high.', 'Network', totalNetworkUsage);
+                    if (totalNetworkUsage > 250) {
+                        triggerWarning('Network usage is critically high.', 'Network', totalNetworkUsage);
+                    } else if (warning?.metric === 'Network') {
+                        removeWarning();
                     }
                 })
                 .catch(error => console.error('Error fetching system status:', error));
@@ -116,7 +127,7 @@ const SystemStatus = () => {
         fetchData();
         const intervalId = setInterval(fetchData, 5000);
         return () => clearInterval(intervalId);
-    }, []);
+    }, [warning]);
 
     const createChartData = (data) => ({
         labels: timestamps,
@@ -155,6 +166,14 @@ const SystemStatus = () => {
     return (
         <div className="card system-status">
             <h2>System Status</h2>
+
+            {/* Warning Card */}
+            {warning && (
+                <div className="warning-card flashing">
+                    <p><strong>{warning.metric} Warning:</strong> {warning.message} ({warning.value.toFixed(2)}%)</p>
+                </div>
+            )}
+
             {status ? (
                 <div>
                     <h3>CPU Usage</h3>

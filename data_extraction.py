@@ -53,7 +53,7 @@ def get_devices():
 
     url = 'http://localhost:8581/api/accessories'
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkyNjIxOTksImV4cCI6MTcyOTI5MDk5OX0.6zcR1_AP1YYS02e0tZspdWrfr1e4Bcl19Dx7svsBPug'}
     response = session.get(url, headers=headers)
 
     if response.status_code == 200:
@@ -144,7 +144,7 @@ def get_system_status():
         'network_status': '/status/network'
     }
     
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkyNjIxOTksImV4cCI6MTcyOTI5MDk5OX0.6zcR1_AP1YYS02e0tZspdWrfr1e4Bcl19Dx7svsBPug'}
     
     system_data = {}
     for key, endpoint in endpoints.items():
@@ -194,7 +194,7 @@ def get_recent_activities():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/cached-accessories'  # Adjust the URL for recent activities
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkyNjIxOTksImV4cCI6MTcyOTI5MDk5OX0.6zcR1_AP1YYS02e0tZspdWrfr1e4Bcl19Dx7svsBPug'}
 
     try:
         response = session.get(url, headers=headers)
@@ -289,7 +289,7 @@ def get_network_interfaces():
     session.mount('https://', SSLAdapter(ssl_context))
 
     url = 'http://localhost:8581/api/server/network-interfaces/system'  # Adjust the URL for network interfaces
-    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxMDkxOTksImV4cCI6MTcyOTEzNzk5OX0.zRtQCMwqgSA_NdAKQalawDxxK3mukh94hTcZdRDe0yk'}
+    headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkyNjIxOTksImV4cCI6MTcyOTI5MDk5OX0.6zcR1_AP1YYS02e0tZspdWrfr1e4Bcl19Dx7svsBPug'}
 
     try:
         response = session.get(url, headers=headers)
@@ -355,38 +355,60 @@ def store_warning():
     })
 
     return jsonify({'message': 'Warning stored successfully'}), 201
-
+'''
 last_switch_status = None
+last_motion_status = None  # Track the last motion status
 
 # Database (for demonstration, using in-memory list)
 switch_logs = []
 
-# Endpoint to fetch the latest switch status
+# Endpoint to fetch the latest switch and motion sensor status
 @app.route('/api/switch/status', methods=['GET'])
 def get_switch_status():
-    return jsonify(switch_logs[-1] if switch_logs else {"message": "No data available."})
+    try:
+        logs = mongo.db.switch_status.find()
+        serialized_logs = [convert_objectid_to_str(log) for log in logs]  # Serialize each log entry
+        return jsonify(serialized_logs), 200
+    except Exception as e:
+        app.logger.error(f'Error fetching logs: {e}')
+        return jsonify({'error': 'Could not fetch logs'}), 500
 
 # Helper function to log status to the database (here, an in-memory list)
-def log_switch_status(switch_status):
+def log_switch_status(switch_status, motion_status=None):
     status_str = "On" if switch_status == 1 else "Off"
+    motion_str = "Detected" if motion_status == 1 else "Not Detected" if motion_status is not None else "Unknown"
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     log_entry = {
         "timestamp": timestamp,
-        "status": status_str
+        "status": status_str,
+        "motion_status": motion_str  # Log the motion sensor status
     }
 
     # Print to console (for debug)
-    print(f"Switch was {status_str} at {timestamp}")
+    print(f"Switch was {status_str}, Motion Sensor: {motion_str} at {timestamp}")
+
+    log_entry_json = json.dumps(log_entry, sort_keys=True)
+    log_entry_bytes = log_entry_json.encode('utf-8')
+
+    sha3_hasher = hashlib.sha3_256()
+    sha3_hasher.update(log_entry_bytes)
+    hashed_logentry = sha3_hasher.hexdigest()  # Get the hash as a hex string
+
+    # Add the hash to the log entry
+    log_entry['hashed_logentry'] = hashed_logentry
 
     # Append log entry to switch_logs list
     switch_logs.append(log_entry)
 
-# Function to fetch the switch status from the accessories API
+    # Store the log entry in MongoDB
+    mongo.db.switch_status.insert_one(log_entry)
+
+# Function to fetch the switch and motion sensor status from the accessories API
 def fetch_switch_status():
-    global last_switch_status
+    global last_switch_status, last_motion_status
     try:
         response = requests.get('http://localhost:8581/api/accessories', headers={
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkxODI2NzYsImV4cCI6MTcyOTIxMTQ3Nn0.yI9xRVVnQ5ds6T1JGc9RoSUIkhmwLvSKcfZGBDoBcII',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNoaWx1dmVsbyIsIm5hbWUiOiJTaGlsdXZlbG8iLCJhZG1pbiI6dHJ1ZSwiaW5zdGFuY2VJZCI6IjE4Zjg0YzgxZWM5M2IyMzY3ZWFhNzQzZDhmZGJiOThjMzg1NzM2ZDUxMmUxMjY4ODc5MTgxNWVkNmMwNTk2MjMiLCJpYXQiOjE3MjkyNjIxOTksImV4cCI6MTcyOTI5MDk5OX0.6zcR1_AP1YYS02e0tZspdWrfr1e4Bcl19Dx7svsBPug',
             'accept': '*/*'
         })
 
@@ -394,35 +416,45 @@ def fetch_switch_status():
 
         # Ensure the response is a list
         if isinstance(accessories, list):
+            switch_status = None
+            motion_status = None
+
             for accessory in accessories:
                 if accessory.get('humanType') == "Switch":
-                    # Check for the "On" value in the "values" dictionary
                     switch_status = accessory.get('values', {}).get('On')
-                    
-                    if switch_status is not None:
-                        # Log the status if it changed
-                        if switch_status != last_switch_status:
-                            log_switch_status(switch_status)
-                            last_switch_status = switch_status
-                        break
-            else:
-                print("Switch not found in the list of accessories.")
+
+                if accessory.get('humanType') == "Motion Sensor":
+                    motion_status = accessory.get('values', {}).get('MotionDetected')
+
+                # If both switch and motion sensor statuses are found, break the loop
+                if switch_status is not None and motion_status is not None:
+                    break
+
+            # Log the switch and motion sensor statuses if they changed
+            if switch_status != last_switch_status or motion_status != last_motion_status:
+                log_switch_status(switch_status, motion_status)
+                last_switch_status = switch_status
+                last_motion_status = motion_status
         else:
             print("Unexpected response format. Expected a list.")
     except Exception as e:
-        print(f"Error fetching switch status: {e}")
+        print(f"Error fetching switch or motion sensor status: {e}")
+
+
 
 # Background task to continuously check the switch status every 10 seconds
 def monitor_switch():
     while True:
         fetch_switch_status()
         time.sleep(10)
-
-# Start monitoring the switch in the background
 import threading
+
+# Start the monitoring in a separate thread
 monitor_thread = threading.Thread(target=monitor_switch)
-monitor_thread.daemon = True
 monitor_thread.start()
+# Start monitoring the switch in the background
+'''
+
    
 if __name__ == '__main__':
     app.run(debug=True)
